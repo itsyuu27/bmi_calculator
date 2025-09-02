@@ -1,11 +1,35 @@
 import 'package:flutter/material.dart';
+import 'bmi.dart';
 
 void main() => runApp(MaterialApp(
     home: MainScreen(),
   )
 );
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+
+  String _bmiResult = '';
+  final _formKey = GlobalKey<FormState>();
+
+  //text editing controller for the textfields
+  final TextEditingController _heightController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+
+  //disposing controllers
+  @override
+  void dispose() {
+    _heightController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,49 +61,117 @@ class MainScreen extends StatelessWidget {
                 )
               ]
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [ 
-                Text("Enter your BMI",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(
-                  width: 200,
-                  child: TextFormField(
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Height',
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [ 
+                  Text("Enter your BMI",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: 200,
-                  child: TextFormField(
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Weight',
+                  SizedBox(
+                    width: 200,
+                    //Textfield for height
+                    child: TextFormField(
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      controller: _heightController,
+                      decoration: InputDecoration(
+                        labelText: 'Height(Meter)',
+                      ),
+                      validator: (value){
+                        //check weight textfield is empty or null
+                        if(value == null || value.isEmpty)
+                        {
+                          return 'Please Enter your height.';
+                        }
+                        if(double.tryParse(value) == null)
+                        {
+                          return 'Please Enter a valid number.';
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.lightBlueAccent),
-                    foregroundColor: MaterialStateProperty.all<Color>(Colors.white)
+                  SizedBox(
+                    width: 200,
+                    //Textfield for weight
+                    child: TextFormField(
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      controller: _weightController,
+                      decoration: InputDecoration(
+                        labelText: 'Weight(Kilogram)',
+                      ),
+                      validator: (value){
+                        //check if weight textfield is empty or null
+                        if(value == null || value.isEmpty)
+                        {
+                          return 'Please Enter your weight.';
+                        }
+                        if(double.tryParse(value) == null)
+                        {
+                          return 'Please Enter a valid number.';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
-                  child: Text('Calculate BMI'),
-                ),
-                /* Text("Results",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  //button for retrieving the input
+                  ElevatedButton(
+                    onPressed: () {
+                      //check the validation
+                      if(_formKey.currentState!.validate())
+                      {
+                        final double height = double.parse(_heightController.text);
+                        final double weight = double.parse(_weightController.text);
+
+                        try
+                        {
+                          //create an instance of Bmi class
+                          final bmiCalculator = Bmi(height: height, weight: weight);
+                
+                          //upadate the state to display result
+                          setState(() {
+                            _bmiResult = bmiCalculator.CalculateBmi().toStringAsFixed(2);
+                          });
+                        }
+                        on ArgumentError catch(e)
+                        {
+                          //set result message to error
+                          setState(() {
+                            _bmiResult = "Error: ${e.message}";
+                          });
+                        }
+                      }
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all<Color>(Colors.lightBlueAccent),
+                      foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                    ),
+                    child: Text('Calculate BMI'),
                   ),
-                ), */
-              ],
+                  //Show only after the result was updated
+                  if(_bmiResult.isNotEmpty)
+                  Column(
+                    children: [
+                      Text('Result',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                      ),
+                      Text("Your BMI: $_bmiResult",
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ),
