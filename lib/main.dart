@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bmi.dart';
 
-// TODO: add option to calculate in metric or imperial measurement,
-
 void main() => runApp(MaterialApp(
     home: MainScreen(),
   )
@@ -77,24 +75,25 @@ class _MainScreenState extends State<MainScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   DropdownButton<String>(
                     value: _selectedMeasurement,
                     hint: const Text('Select Measurement'),
                     items: <String>['Metric', 'Imperial']
-                      .map<DropdownMenuItem<String>>((String value) {
+                      .map<DropdownMenuItem<String>>((String value){
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
                         );
                       }
                     ).toList(),
-
                     onChanged: (String? newValue){
                       setState(() {
                         _selectedMeasurement = newValue;
                       });
                     }
                   ),
+
                   SizedBox(
                     width: 200,
                     //Textfield for height
@@ -118,6 +117,7 @@ class _MainScreenState extends State<MainScreen> {
                       },
                     ),
                   ),
+
                   SizedBox(
                     width: 200,
                     //Textfield for weight
@@ -141,6 +141,7 @@ class _MainScreenState extends State<MainScreen> {
                       },
                     ),
                   ),
+
                   //button for retrieving the input
                   ElevatedButton(
                     onPressed: () {
@@ -179,6 +180,10 @@ class _MainScreenState extends State<MainScreen> {
                             _bmiResult = "";
                             _classification = "";
                           });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Please Choose a Measurement System"),
+                            )
+                          );
                         }
                       }
                     },
@@ -188,6 +193,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     child: Text('Calculate BMI'),
                   ),
+
                   //Show only after the result was updated
                   if(_bmiResult.isNotEmpty)
                   Column(
@@ -211,7 +217,7 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
