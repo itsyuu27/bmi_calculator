@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'bmi.dart';
 
+// TODO: add option to calculate in metric or imperial measurement,
+
 void main() => runApp(MaterialApp(
     home: MainScreen(),
   )
@@ -16,6 +18,8 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
 
   String _bmiResult = '';
+  String _classification = '';
+  String? _selectedMeasurement;
   final _formKey = GlobalKey<FormState>();
 
   //text editing controller for the textfields
@@ -73,6 +77,24 @@ class _MainScreenState extends State<MainScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  DropdownButton<String>(
+                    value: _selectedMeasurement,
+                    hint: const Text('Select Measurement'),
+                    items: <String>['Metric', 'Imperial']
+                      .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }
+                    ).toList(),
+
+                    onChanged: (String? newValue){
+                      setState(() {
+                        _selectedMeasurement = newValue;
+                      });
+                    }
+                  ),
                   SizedBox(
                     width: 200,
                     //Textfield for height
@@ -80,7 +102,7 @@ class _MainScreenState extends State<MainScreen> {
                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                       controller: _heightController,
                       decoration: InputDecoration(
-                        labelText: 'Height(Meter)',
+                        labelText: _selectedMeasurement == 'Metric' ? 'Height(Meters)' : 'Height(Inches)',
                       ),
                       validator: (value){
                         //check weight textfield is empty or null
@@ -103,7 +125,7 @@ class _MainScreenState extends State<MainScreen> {
                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                       controller: _weightController,
                       decoration: InputDecoration(
-                        labelText: 'Weight(Kilogram)',
+                        labelText: _selectedMeasurement == 'Metric' ? 'Weight(Kilograms)' : "Weight(Pounds)",
                       ),
                       validator: (value){
                         //check if weight textfield is empty or null
@@ -125,24 +147,37 @@ class _MainScreenState extends State<MainScreen> {
                       //check the validation
                       if(_formKey.currentState!.validate())
                       {
-                        final double height = double.parse(_heightController.text);
-                        final double weight = double.parse(_weightController.text);
+                        if(_selectedMeasurement != null){
+                          final double height = double.parse(_heightController.text);
+                          final double weight = double.parse(_weightController.text);
 
-                        try
-                        {
-                          //create an instance of Bmi class
-                          final bmiCalculator = Bmi(height: height, weight: weight);
-                
-                          //upadate the state to display result
-                          setState(() {
-                            _bmiResult = bmiCalculator.CalculateBmi().toStringAsFixed(2);
-                          });
+                          try
+                          {
+                            //create an instance of Bmi class
+                            final bmiCalculator = Bmi(
+                              height: height,
+                              weight: weight,
+                              measureSystem: _selectedMeasurement
+                            );
+                  
+                            //upadate the state to display result
+                            setState(() {
+                              _bmiResult = bmiCalculator.calculateBmi().toStringAsFixed(2);
+                              _classification = bmiCalculator.getClassification().toString();
+                            });
+                          }
+                          on ArgumentError catch(e)
+                          {
+                            //set result message to error
+                            setState(() {
+                              _bmiResult = "Error: ${e.message}";
+                            });
+                          }
                         }
-                        on ArgumentError catch(e)
-                        {
-                          //set result message to error
+                        else{
                           setState(() {
-                            _bmiResult = "Error: ${e.message}";
+                            _bmiResult = "";
+                            _classification = "";
                           });
                         }
                       }
@@ -166,6 +201,13 @@ class _MainScreenState extends State<MainScreen> {
                       Text("Your BMI: $_bmiResult",
                         style: TextStyle(
                           fontSize: 18,
+                        ),
+                      ),
+                      Text("Your Classification: $_classification",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ],
