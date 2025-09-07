@@ -2,27 +2,30 @@ class Bmi {
   double height;
   double weight;
   String? measureSystem;
-  late double bmiResult;
 
   Bmi({required this.height, required this.weight, required this.measureSystem});
 
   double calculateBmi(){
-    if(height <= 0){
-      throw ArgumentError("Height must be greater than 0.");
+    if(height <= 0 || weight <= 0){
+      throw ArgumentError("Height and Weight must be greater than 0.");
     }
+
+    double convertedHeight;
 
     if(measureSystem == "Metric"){
-      bmiResult = weight / (height * height);
+      convertedHeight = height / 100;
+      return weight / (convertedHeight * convertedHeight);
     }
-
-    if(measureSystem == "Imperial"){
-      bmiResult = (weight / (height * height)) * 703;
-      print(bmiResult);
+    else if(measureSystem == "Imperial"){
+      convertedHeight = height;
+      return (weight / (convertedHeight * convertedHeight)) * 703;
     }
-    return bmiResult;
+    else{
+      throw ArgumentError("Unsupported measurement system: $measureSystem");
+    }
   }
 
-  String getClassification(){
+  String getClassification(double bmiResult){
     if(bmiResult < 18.5){
       return 'Underweight';
     }

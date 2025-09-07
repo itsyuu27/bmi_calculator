@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'bmi.dart';
 
 void main() => runApp(MaterialApp(
-    home: MainScreen(),
+    home: MainScreen(), debugShowCheckedModeBanner: false,
   )
 );
 
@@ -101,16 +101,14 @@ class _MainScreenState extends State<MainScreen> {
                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                       controller: _heightController,
                       decoration: InputDecoration(
-                        labelText: _selectedMeasurement == 'Metric' ? 'Height(Meters)' : 'Height(Inches)',
+                        labelText: _selectedMeasurement == 'Metric' ? 'Height(Centimeters)' : 'Height(Inches)',
                       ),
                       validator: (value){
                         //check weight textfield is empty or null
-                        if(value == null || value.isEmpty)
-                        {
+                        if(value == null || value.isEmpty){
                           return 'Please Enter your height.';
                         }
-                        if(double.tryParse(value) == null)
-                        {
+                        if(double.tryParse(value) == null){
                           return 'Please Enter a valid number.';
                         }
                         return null;
@@ -129,12 +127,10 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       validator: (value){
                         //check if weight textfield is empty or null
-                        if(value == null || value.isEmpty)
-                        {
+                        if(value == null || value.isEmpty){
                           return 'Please Enter your weight.';
                         }
-                        if(double.tryParse(value) == null)
-                        {
+                        if(double.tryParse(value) == null){
                           return 'Please Enter a valid number.';
                         }
                         return null;
@@ -146,32 +142,30 @@ class _MainScreenState extends State<MainScreen> {
                   ElevatedButton(
                     onPressed: () {
                       //check the validation
-                      if(_formKey.currentState!.validate())
-                      {
+                      if(_formKey.currentState!.validate()){
                         if(_selectedMeasurement != null){
-                          final double height = double.parse(_heightController.text);
-                          final double weight = double.parse(_weightController.text);
-
-                          try
-                          {
+                          try{
                             //create an instance of Bmi class
                             final bmiCalculator = Bmi(
-                              height: height,
-                              weight: weight,
+                              height: double.parse(_heightController.text),
+                              weight:  double.parse(_weightController.text),
                               measureSystem: _selectedMeasurement
                             );
+
+                            final double calculatedBmi = bmiCalculator.calculateBmi();
+                            final String classificationResult = bmiCalculator.getClassification(calculatedBmi);
                   
                             //upadate the state to display result
                             setState(() {
-                              _bmiResult = bmiCalculator.calculateBmi().toStringAsFixed(2);
-                              _classification = bmiCalculator.getClassification().toString();
+                              _bmiResult = calculatedBmi.toStringAsFixed(2);
+                              _classification = classificationResult;
                             });
                           }
-                          on ArgumentError catch(e)
-                          {
+                          on ArgumentError catch(e){
                             //set result message to error
                             setState(() {
                               _bmiResult = "Error: ${e.message}";
+                              _classification = '';
                             });
                           }
                         }
