@@ -6,7 +6,7 @@ A simple Flutter app that calculates a user's Body Mass Index (BMI) based on the
 
 ### Features
 
-* **Dual Measurement Systems**: Supports both the **Metric** (kilograms, meters) and **Imperial** (pounds, inches) systems.
+* **Dual Measurement Systems**: Supports both the **Metric** (kilograms, centimeters) and **Imperial** (pounds, inches) systems.
 * **Dynamic UI**: The input field labels change dynamically to guide the user to enter the correct units based on their selected measurement system.
 * **Input Validation**: Ensures that the user enters valid numerical data and displays clear error messages for empty or invalid inputs.
 * **Health Classification**: Classifies the calculated BMI into standard health categories (Underweight, Healthy Weight, Overweight, and Obese).
